@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>مغامرة الذكاء الاصطناعي</title>
+
+<style>
+:root{
+  --card:#ffffff;
+  --main:#a78bfa;
+  --accent:#f9a8d4;
+  --correct:#86efac;
+  --wrong:#fda4af;
+  --text:#374151;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:"Cairo", sans-serif;
+}
+
+body{
+  margin:0;
+  background:linear-gradient(135deg,#fde68a,#fbcfe8,#bfdbfe);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.container{
+  width:90%;
+  max-width:750px;
+  background:var(--card);
+  border-radius:26px;
+  padding:25px;
+  box-shadow:0 20px 40px rgba(0,0,0,.15);
+  animation:pop .5s ease;
+}
+
+@keyframes pop{
+  from{transform:scale(.9);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.badge{
+  background:var(--main);
+  color:white;
+  padding:6px 16px;
+  border-radius:20px;
+}
+
+.timer{
+  font-weight:bold;
+  color:#7c3aed;
+}
+
+.progress{
+  width:100%;
+  height:12px;
+  background:#e5e7eb;
+  border-radius:10px;
+  overflow:hidden;
+  margin:15px 0;
+}
+
+.bar{
+  height:100%;
+  background:linear-gradient(90deg,#a78bfa,#f9a8d4);
+  transition:.4s;
+}
+
+.question{
+  font-size:20px;
+  margin-bottom:10px;
+}
+
+.q-img{
+  width:100%;
+  max-height:200px;
+  object-fit:contain;
+  margin-bottom:15px;
+}
+
+.options{
+  display:grid;
+  gap:12px;
+}
+
+.option{
+  background:#fef3c7;
+  padding:14px;
+  border-radius:18px;
+  cursor:pointer;
+  transition:.3s;
+}
+
+.option:hover{
+  background:#fde68a;
+  transform:scale(1.03);
+}
+
+.option.correct{ background:var(--correct); }
+.option.wrong{ background:var(--wrong); }
+
+.next{
+  margin-top:20px;
+  background:var(--accent);
+  border:none;
+  padding:14px;
+  border-radius:20px;
+  font-size:16px;
+  cursor:pointer;
+  width:100%;
+  display:none;
+}
+
+.result{
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="game">
+  <div id="start">
+    <h2>🌈 مغامرة الذكاء الاصطناعي</h2>
+    <p>🕒 لكل سؤال 20 ثانية</p>
+    <button class="next" style="display:block" onclick="start()">ابدأ اللعب</button>
+  </div>
+</div>
+
+<!-- الأصوات -->
+<audio id="ok" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3"></audio>
+<audio id="no" src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3"></audio>
+<audio id="end" src="https://assets.mixkit.co/sfx/preview/mixkit-game-level-completed-2059.mp3"></audio>
+
+<script>
+const questions=[
+{
+ q:"ما هو تعريف الذكاء الاصطناعي (AI)؟",
+ img:"images/ai.png",
+ o:[
+  "هو نوع من الروبوتات فقط",
+  "برنامج لتصفح الإنترنت",
+  "جهاز للتشغيل المتكرر",
+  "فرع من البرمجيات يحاكي الذكاء البشري"
+ ],
+ a:3
+},
+{
+ q:"أي من الخيارات يمثل الواقع المعزز (AR)؟",
+ img:"images/ar.png",
+ o:[
+  "استخدام الآلة الحاسبة",
+  "نظارات تنقلك لعالم افتراضي",
+  "اللعب بجهاز تحكم",
+  "إضافة عناصر رقمية للعالم الحقيقي"
+ ],
+ a:3
+},
+{
+ q:"ما الفرق بين VR و AR؟",
+ img:"images/vr-ar.png",
+ o:[
+  "VR للتعليم فقط",
+  "AR يحتاج نظارات خاصة",
+  "VR عالم كامل و AR يضيف عناصر",
+  "لا يوجد فرق"
+ ],
+ a:2
+},
+{
+ q:"Google Maps يستخدم الذكاء الاصطناعي لـ:",
+ img:"images/maps.png",
+ o:[
+  "الرد على الرسائل",
+  "إنشاء فيديو",
+  "تعديل الصور",
+  "تحديد أسرع طريق والازدحام"
+ ],
+ a:3
+},
+{
+ q:"ما هو التزييف العميق (Deepfake)؟",
+ img:"images/deepfake.png",
+ o:[
+  "برنامج ألعاب",
+  "فيروس",
+  "طريقة لحفظ كلمات المرور",
+  "إنشاء وسائط مزيفة واقعية"
+ ],
+ a:3
+},
+{
+ q:"لماذا يجب التأكد من المعلومات؟",
+ img:"images/verify.png",
+ o:[
+  "المعلومات غير مفهومة",
+  "يسرق البيانات",
+  "يرفض الإجابة",
+  "قد يقدم معلومات خاطئة"
+ ],
+ a:3
+},
+{
+ q:"Siri و Alexa مثال على:",
+ img:"images/assistant.png",
+ o:[
+  "نظارات VR",
+  "مساعدات صوتية ذكية",
+  "برامج حماية",
+  "روبوتات جراحية"
+ ],
+ a:1
+},
+{
+ q:"Clipchamp يُستخدم لـ:",
+ img:"images/video.png",
+ o:[
+  "تشغيل الموسيقى",
+  "تحرير الفيديو واقتراح مقاطع",
+  "تصوير الفيديو",
+  "حذف الفيديوهات"
+ ],
+ a:1
+},
+{
+ q:"أي استخدام غير أخلاقي للذكاء الاصطناعي؟",
+ img:"images/ethics.png",
+ o:[
+  "تنظيم الواجبات",
+  "المساعدة في البحث",
+  "إنشاء صور مزيفة ونشر شائعات",
+  "تعلم لغة جديدة"
+ ],
+ a:2
+},
+{
+ q:"هل الذكاء الاصطناعي يفكر ذاتيًا؟",
+ img:"images/brain.png",
+ o:[
+  "صحيح لأنه يتعلم",
+  "خطأ لأنه لا يخطئ",
+  "صحيح لأنه مثل البشر",
+  "خطأ لأنه يعتمد على بيانات وخوارزميات"
+ ],
+ a:3
+}
+];
+
+
+let i=0,score=0,time=20,timer;
+
+function start(){
+ i=0; score=0;
+ show();
+}
+
+function show(){
+ clearInterval(timer);
+ time=20;
+ const q=questions[i];
+
+ document.getElementById("game").innerHTML=`
+ <header>
+  <div class="badge">⭐ ${score}</div>
+  <div class="timer">⏱ <span id="t">${time}</span></div>
+ </header>
+
+ <div class="progress">
+  <div class="bar" style="width:${(i/questions.length)*100}%"></div>
+ </div>
+
+ <div class="question">${q.q}</div>
+ <img class="q-img" src="${q.img}">
+ <div class="options">
+  ${q.o.map((x,n)=>`<div class="option" onclick="check(${n})">${x}</div>`).join("")}
+ </div>
+ <button class="next" id="next" onclick="next()">التالي</button>
+ `;
+
+ timer=setInterval(()=>{
+  time--;
+  document.getElementById("t").textContent=time;
+  if(time===0) next();
+ },1000);
+}
+
+function check(n){
+ document.querySelectorAll(".option").forEach(o=>o.style.pointerEvents="none");
+ if(n===questions[i].a){
+  document.querySelectorAll(".option")[n].classList.add("correct");
+  document.getElementById("ok").play();
+  score+=10;
+ }else{
+  document.querySelectorAll(".option")[n].classList.add("wrong");
+  document.querySelectorAll(".option")[questions[i].a].classList.add("correct");
+  document.getElementById("no").play();
+ }
+ document.getElementById("next").style.display="block";
+}
+
+function next(){
+ clearInterval(timer);
+ i++;
+ if(i<questions.length) show();
+ else endGame();
+}
+
+function endGame(){
+ document.getElementById("end").play();
+ document.getElementById("game").innerHTML=`
+ <div class="result">
+  <h2>🎉 أحسنت!</h2>
+  <p>نتيجتك النهائية:</p>
+  <h1>${score}</h1>
+  <button class="next" style="display:block" onclick="location.reload()">إعادة اللعب</button>
+ </div>
+ `;
+}
+</script>
+
+</body>
+</html>
