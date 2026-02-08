@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>مغامرة الذكاء الاصطناعي</title>
 
 <style>
@@ -25,12 +26,14 @@ body{
   min-height:100vh;
   display:flex;
   justify-content:center;
-  align-items:center;
+  align-items:flex-start;
+  padding:20px;
 }
 
+/* الحاوية الرئيسية */
 .container{
-  width:90%;
-  max-width:750px;
+  width:100%;
+  max-width:1200px;
   background:var(--card);
   border-radius:26px;
   padding:25px;
@@ -39,7 +42,7 @@ body{
 }
 
 @keyframes pop{
-  from{transform:scale(.9);opacity:0}
+  from{transform:scale(.95);opacity:0}
   to{transform:scale(1);opacity:1}
 }
 
@@ -47,6 +50,8 @@ header{
   display:flex;
   justify-content:space-between;
   align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
 }
 
 .badge{
@@ -77,19 +82,20 @@ header{
 }
 
 .question{
-  font-size:20px;
+  font-size:22px;
   margin-bottom:10px;
 }
 
 .q-img{
   width:100%;
-  max-height:200px;
+  max-height:320px;
   object-fit:contain;
   margin-bottom:15px;
 }
 
 .options{
   display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   gap:12px;
 }
 
@@ -99,6 +105,11 @@ header{
   border-radius:18px;
   cursor:pointer;
   transition:.3s;
+  min-height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
 }
 
 .option:hover{
@@ -125,7 +136,6 @@ header{
   text-align:center;
 }
 
-
 .lesson-info{
   text-align:center;
   margin-bottom:20px;
@@ -134,7 +144,7 @@ header{
 
 .lesson-info h1{
   margin:0;
-  font-size:26px;
+  font-size:28px;
   color:#7c3aed;
 }
 
@@ -163,17 +173,64 @@ header{
   width:100%;
 }
 
+/* تحسين العرض على الشاشات الصغيرة */
+@media (max-width:600px){
+  .question{font-size:18px}
+  .lesson-info h1{font-size:22px}
+  .q-img{max-height:220px}
+}
+
+/* =========================
+   Responsive Font Sizes
+   ========================= */
+
+/* الخط الأساسي للصفحة */
+body{
+  font-size: clamp(16px, 1.2vw, 19px);
+}
+
+/* العناوين */
+.lesson-info h1{
+  font-size: clamp(22px, 3vw, 30px);
+}
+
+h2{
+  font-size: clamp(20px, 2.5vw, 26px);
+}
+
+/* نص السؤال */
+.question{
+  font-size: clamp(18px, 2.2vw, 24px);
+  line-height: 1.6;
+}
+
+/* الخيارات */
 .option{
-  min-height:60px; /* ارتفاع ثابت أدنى */
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
+  font-size: clamp(15px, 1.6vw, 18px);
+}
+
+/* الأزرار */
+.start-btn,
+.next{
+  font-size: clamp(15px, 1.6vw, 18px);
+}
+
+/* العداد والنقاط */
+.timer,
+.badge{
+  font-size: clamp(14px, 1.4vw, 16px);
+}
+
+/* نتيجة النهاية */
+.result h1{
+  font-size: clamp(26px, 4vw, 36px);
 }
 </style>
 </head>
 
 <body>
+
+<div class="container">
 
 <div id="start">
   <div class="lesson-info">
@@ -189,28 +246,25 @@ header{
   <button class="start-btn" onclick="start()">ابدأ اللعب</button>
 </div>
 
-<!-- عنصر اللعبة -->
 <div id="game"></div>
 
-<!-- الأصوات -->
 <audio id="ok"></audio>
 <audio id="no"></audio>
 <audio id="end"></audio>
 
+</div>
+
 <script>
-// الأصوات في ملف خارجي (يمكن تعديل الروابط هنا)
 const sounds = {
   ok: "https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3",
   no: "https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3",
   end: "https://assets.mixkit.co/sfx/preview/mixkit-game-level-completed-2059.mp3"
 };
 
-// تعيين الأصوات
 document.getElementById("ok").src = sounds.ok;
 document.getElementById("no").src = sounds.no;
 document.getElementById("end").src = sounds.end;
 
-// الأسئلة
 const questions=[
   { q:"ما هو تعريف الذكاء الاصطناعي (AI)؟", img:"images/ai.png", o:["هو نوع من الروبوتات فقط","برنامج لتصفح الإنترنت","جهاز للتشغيل المتكرر","فرع من البرمجيات يحاكي الذكاء البشري"], a:3 },
   { q:"أي من الخيارات يمثل الواقع المعزز (AR)؟", img:"images/ar.png", o:["استخدام الآلة الحاسبة","نظارات تنقلك لعالم افتراضي","اللعب بجهاز تحكم","إضافة عناصر رقمية للعالم الحقيقي"], a:3 },
@@ -226,14 +280,12 @@ const questions=[
 
 let i=0, score=0, time=20, timer;
 
-// بدء اللعبة
 function start(){
   document.getElementById("start").style.display="none";
   i=0; score=0;
   show();
 }
 
-// عرض السؤال
 function show(){
   clearInterval(timer);
   time=20;
@@ -264,7 +316,6 @@ function show(){
   },1000);
 }
 
-// التحقق من الإجابة
 function check(n){
   document.querySelectorAll(".option").forEach(o=>o.style.pointerEvents="none");
   if(n===questions[i].a){
@@ -279,7 +330,6 @@ function check(n){
   document.getElementById("next").style.display="block";
 }
 
-// السؤال التالي
 function next(){
   clearInterval(timer);
   i++;
@@ -287,7 +337,6 @@ function next(){
   else endGame();
 }
 
-// نهاية اللعبة
 function endGame(){
   document.getElementById("end").play();
   document.getElementById("game").innerHTML=`
@@ -300,7 +349,6 @@ function endGame(){
   `;
 }
 
-// إعادة اللعب
 function restart(){
   document.getElementById("start").style.display="block";
   document.getElementById("game").innerHTML="";
