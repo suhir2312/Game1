@@ -256,13 +256,13 @@ h2{
 
 <script>
 const sounds = {
-  ok: "https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3",
-  no: "https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3",
+    correct: "sounds/correct.mp3",
+    wrong: "sounds/wrong.mp3",
   end: "https://assets.mixkit.co/sfx/preview/mixkit-game-level-completed-2059.mp3"
 };
 
-document.getElementById("ok").src = sounds.ok;
-document.getElementById("no").src = sounds.no;
+ok.src = sounds.correct;
+no.src = sounds.wrong;
 document.getElementById("end").src = sounds.end;
 
 const questions=[
